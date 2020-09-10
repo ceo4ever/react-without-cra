@@ -1,4 +1,6 @@
+const webpack = require("webpack");
 const path = require("path");
+const dotenv = require("dotenv");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== "false";
@@ -6,6 +8,7 @@ const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== "false";
 module.exports = (webpackEnv) => {
   const isEnvDevelopment = webpackEnv === "development";
   const isEnvProduction = webpackEnv === "production";
+
   return {
     mode: webpackEnv,
     entry: "./src/index.js",
@@ -31,7 +34,14 @@ module.exports = (webpackEnv) => {
         },
       ],
     },
-    plugins: [new HtmlWebpackPlugin({ template: "./public/index.html" })],
+    plugins: [
+      new HtmlWebpackPlugin({ template: "./public/index.html" }),
+      new webpack.DefinePlugin({
+        "process.env": JSON.stringify(
+          Object.assign(process.env, dotenv.config().parsed)
+        ),
+      }),
+    ],
     devtool: isEnvProduction
       ? shouldUseSourceMap
         ? "source-map"
@@ -42,7 +52,6 @@ module.exports = (webpackEnv) => {
       contentBase: path.join(__dirname, "public"),
       open: true,
       historyApiFallback: true,
-      overlay: false,
     },
   };
 };

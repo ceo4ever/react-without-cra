@@ -1,22 +1,13 @@
 import React from "react";
-import { BrowserRouter, Route, Switch, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
 import Header from "./Header";
-import ReactIcon from "./assets/React.png";
-
-function Home() {
-  console.log(require("./assets/React.png"));
-  const { pathname } = useLocation();
-  return (
-    <div>
-      <p>{pathname}</p>
-      <img src={ReactIcon} />
-    </div>
-  );
-}
+import Home from "./Home";
+import GlobalStyle from "./GlobalStyles";
 
 function App() {
   return (
     <>
+      <GlobalStyle />
       <BrowserRouter>
         <Header />
         <Switch>

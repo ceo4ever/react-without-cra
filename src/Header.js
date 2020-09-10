@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import styled from "styled-components";
 
 const SLink = styled(Link)`
@@ -10,7 +10,7 @@ const SLink = styled(Link)`
 `;
 
 function Header() {
-  const pathname = location.pathname;
+  const { pathname } = useLocation();
   return (
     <div>
       <SLink to="/" current={pathname === "/" ? "true" : "false"}>
