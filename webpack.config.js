@@ -3,6 +3,12 @@ const path = require("path");
 const dotenv = require("dotenv");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
+const appIndex = path.resolve(__dirname, "src", "index.js");
+const appHtml = path.resolve(__dirname, "public", "index.html");
+const appBuild = path.resolve(__dirname, "build");
+const appPublic = path.resolve(__dirname, "public");
+const appSrc = path.resolve(__dirname, "src");
+
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== "false";
 
 module.exports = (webpackEnv) => {
@@ -11,17 +17,19 @@ module.exports = (webpackEnv) => {
 
   return {
     mode: webpackEnv,
-    entry: "./src/index.js",
+    entry: appIndex,
     output: {
-      path: path.resolve(__dirname, "build"),
-      filename: "static/js/[name].bundle.js",
+      path: appBuild,
+      filename: isEnvProduction
+        ? "static/js/[name].[contenthash:8].js"
+        : isEnvDevelopment && "static/js/bundle.js",
     },
     module: {
       rules: [
         {
           test: /\.(js|mjs|jsx|ts|tsx)$/,
           use: "babel-loader",
-          include: path.resolve(__dirname, "src"),
+          include: appSrc,
         },
         {
           test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
@@ -35,10 +43,12 @@ module.exports = (webpackEnv) => {
       ],
     },
     plugins: [
-      new HtmlWebpackPlugin({ template: "./public/index.html" }),
+      new HtmlWebpackPlugin({ template: appHtml }),
       new webpack.DefinePlugin({
         "process.env": JSON.stringify(
-          Object.assign(process.env, dotenv.config().parsed)
+          Object.assign({}, dotenv.config().parsed, {
+            NODE_ENV: webpackEnv,
+          })
         ),
       }),
     ],
@@ -49,9 +59,10 @@ module.exports = (webpackEnv) => {
       : isEnvDevelopment && "cheap-module-source-map",
     devServer: {
       port: 3000,
-      contentBase: path.join(__dirname, "public"),
+      contentBase: appPublic,
       open: true,
       historyApiFallback: true,
+      overlay: true,
     },
   };
 };
