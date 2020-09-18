@@ -1,6 +1,6 @@
+require("dotenv").config();
 const webpack = require("webpack");
 const path = require("path");
-const dotenv = require("dotenv");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const appIndex = path.resolve(__dirname, "src", "index.js");
@@ -11,9 +11,26 @@ const appSrc = path.resolve(__dirname, "src");
 
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== "false";
 
+function getClientEnv(nodeEnv) {
+  return {
+    "process.env": JSON.stringify(
+      Object.keys(process.env)
+        .filter((key) => /^REACT_APP/i.test(key))
+        .reduce(
+          (env, key) => {
+            env[key] = process.env[key];
+            return env;
+          },
+          { NODE_ENV: nodeEnv }
+        )
+    ),
+  };
+}
+
 module.exports = (webpackEnv) => {
   const isEnvDevelopment = webpackEnv === "development";
   const isEnvProduction = webpackEnv === "production";
+  const clientEnv = getClientEnv(webpackEnv);
 
   return {
     mode: webpackEnv,
@@ -44,13 +61,7 @@ module.exports = (webpackEnv) => {
     },
     plugins: [
       new HtmlWebpackPlugin({ template: appHtml }),
-      new webpack.DefinePlugin({
-        "process.env": JSON.stringify(
-          Object.assign({}, dotenv.config().parsed, {
-            NODE_ENV: webpackEnv,
-          })
-        ),
-      }),
+      new webpack.DefinePlugin(clientEnv),
     ],
     devtool: isEnvProduction
       ? shouldUseSourceMap
