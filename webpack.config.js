@@ -2,6 +2,9 @@ require("dotenv").config();
 const webpack = require("webpack");
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
+  .BundleAnalyzerPlugin;
 
 const appIndex = path.resolve(__dirname, "src", "index.js");
 const appHtml = path.resolve(__dirname, "public", "index.html");
@@ -40,6 +43,9 @@ module.exports = (webpackEnv) => {
       filename: isEnvProduction
         ? "static/js/[name].[contenthash:8].js"
         : isEnvDevelopment && "static/js/bundle.js",
+      chunkFilename: isEnvProduction
+        ? "static/js/[name].[contenthash:8].chunk.js"
+        : isEnvDevelopment && "static/js/[name].chunk.js",
     },
     module: {
       rules: [
@@ -59,9 +65,21 @@ module.exports = (webpackEnv) => {
         },
       ],
     },
+    optimization: {
+      minimize: isEnvProduction,
+      minimizer: [new TerserPlugin()],
+      splitChunks: {
+        chunks: "all",
+        name: false,
+      },
+      runtimeChunk: {
+        name: (entrypoint) => `runtime-${entrypoint.name}`,
+      },
+    },
     plugins: [
       new HtmlWebpackPlugin({ template: appHtml }),
       new webpack.DefinePlugin(clientEnv),
+      new BundleAnalyzerPlugin(),
     ],
     devtool: isEnvProduction
       ? shouldUseSourceMap
