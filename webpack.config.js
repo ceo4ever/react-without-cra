@@ -79,7 +79,7 @@ module.exports = (webpackEnv) => {
     plugins: [
       new HtmlWebpackPlugin({ template: appHtml }),
       new webpack.DefinePlugin(clientEnv),
-      new BundleAnalyzerPlugin(),
+      // new BundleAnalyzerPlugin(),
     ],
     devtool: isEnvProduction
       ? shouldUseSourceMap
