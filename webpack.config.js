@@ -52,8 +52,12 @@ module.exports = (webpackEnv) => {
       rules: [
         {
           test: /\.(js|mjs|jsx|ts|tsx)$/,
-          use: "babel-loader",
+          loader: "babel-loader",
           include: appSrc,
+          options: {
+            cacheDirectory: true,
+            cacheCompression: false,
+          },
         },
         {
           test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
@@ -93,6 +97,9 @@ module.exports = (webpackEnv) => {
       open: true,
       historyApiFallback: true,
       overlay: true,
+    },
+    cache: {
+      type: isEnvDevelopment ? "memory" : isEnvProduction && "filesystem",
     },
   };
 };
