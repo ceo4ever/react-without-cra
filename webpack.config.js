@@ -47,26 +47,51 @@ module.exports = (webpackEnv) => {
       chunkFilename: isEnvProduction
         ? "static/js/[name].[contenthash:8].chunk.js"
         : isEnvDevelopment && "static/js/[name].chunk.js",
+      publicPath: "/",
     },
     module: {
       rules: [
         {
-          test: /\.(js|mjs|jsx|ts|tsx)$/,
-          loader: "babel-loader",
-          include: appSrc,
+          test: /\.(js|jsx)$/,
+          enforce: "pre",
+          exclude: /node_modules/,
+          loader: "eslint-loader",
           options: {
-            cacheDirectory: true,
-            cacheCompression: false,
+            cache: true,
+            formatter: isEnvDevelopment
+              ? "codeframe"
+              : isEnvProduction && "stylish",
           },
+          include: appSrc,
         },
         {
-          test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
-          loader: "url-loader",
-          options: {
-            limit: 10000,
-            outputPath: "static/media",
-            name: "[name].[hash:8].[ext]",
-          },
+          oneOf: [
+            {
+              test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
+              loader: "url-loader",
+              options: {
+                limit: 10000,
+                outputPath: "static/media",
+                name: "[name].[hash:8].[ext]",
+              },
+            },
+            {
+              test: /\.(js|mjs|jsx|ts|tsx)$/,
+              loader: "babel-loader",
+              include: appSrc,
+              options: {
+                cacheDirectory: true,
+                cacheCompression: false,
+              },
+            },
+            {
+              loader: "file-loader",
+              exclude: [/\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.json$/],
+              options: {
+                name: "static/media/[name].[hash:8].[ext]",
+              },
+            },
+          ],
         },
       ],
     },
@@ -97,9 +122,21 @@ module.exports = (webpackEnv) => {
       open: true,
       historyApiFallback: true,
       overlay: true,
+      stats: "errors-warnings",
     },
     cache: {
       type: isEnvDevelopment ? "memory" : isEnvProduction && "filesystem",
+    },
+    stats: {
+      builtAt: false,
+      children: false,
+      entrypoints: false,
+      hash: false,
+      modules: false,
+      version: false,
+      publicPath: true,
+      excludeAssets: [/\.(map|txt|html|jpg|png)$/],
+      warningsFilter: [/exceed/, /performance/],
     },
   };
 };
