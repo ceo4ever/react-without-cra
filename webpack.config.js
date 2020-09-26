@@ -3,6 +3,7 @@ const webpack = require("webpack");
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
+const ManifestPlugin = require("webpack-manifest-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
   .BundleAnalyzerPlugin;
 
@@ -109,6 +110,7 @@ module.exports = (webpackEnv) => {
     plugins: [
       new HtmlWebpackPlugin({ template: appHtml }),
       new webpack.DefinePlugin(clientEnv),
+      new ManifestPlugin(),
       isBundleAnalyze && new BundleAnalyzerPlugin(),
     ].filter(Boolean),
     devtool: isEnvProduction
